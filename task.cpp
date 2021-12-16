@@ -32,6 +32,31 @@ vector<vector<string>> split(string str)
     return res;
 }
 
+void initializeTasks()
+{
+    string todo, priority, task;
+    bool isDone;
+    vector<vector<string>> todov;
+	ifstream task_file;
+    task_file.open("task.txt");
+    if(task_file) {
+        ostringstream ss;
+        ss << task_file.rdbuf();
+        todo = ss.str();
+        todov = split(todo);
+        for(int i=0; i<todov.size(); i++)
+        {
+            priority=todov[i][0];
+            task=todov[i][1];
+            isDone=((todov[i][2]=="1") ? true : false);
+            // cout<<"["<<priority<<"] "<<task<<" "<<isDone<<endl;
+            tasks.insert({priority, pair<string,bool>{task, isDone}});
+            // cout<<endl;
+        }
+    }
+    task_file.close();
+}
+
 void printHelp()
 {
     cout<<"Usage :-"<<endl;
@@ -48,8 +73,15 @@ void updateTask()
 	ofstream task_file;
     task_file.open("task.txt");
     if(task_file) {
+        int i=0, count=0;
         for(auto itr=tasks.begin(); itr!=tasks.end(); itr++)
-            task_file<<itr->first<<";"<<(itr->second).first<<";"<<(itr->second).second<<endl;
+            count++;
+        for(auto itr=tasks.begin(); itr!=tasks.end(); itr++)
+        {
+            task_file<<itr->first<<";"<<(itr->second).first<<";"<<(itr->second).second;
+            i++;
+            if(i<count) task_file<<"\n";
+        }
     }
     task_file.close();
 }
@@ -60,80 +92,111 @@ void addTask(int argc, char* argv[])
         cout<<"Error: Missing tasks string. Nothing added!";
     else
     {
-        tasks.insert({argv[2], pair<string,bool>{argv[3], false}});
+        string todo="";
+        for(int i=3; i<argc; i++)
+            todo+=argv[i];
+        tasks.insert({argv[2], pair<string,bool>{todo, false}});
         updateTask();
+        cout<<"Added task: \""<<todo<<"\" with priority "<<argv[2]<<endl;
     }
 }
 
 void lsTask()
 {
-    int i=0;
+    int i=1;
     for(auto itr=tasks.begin(); itr!=tasks.end(); itr++)
     {
-        cout<<i<<". "<<itr->first<<" ["<<(itr->second).first<<"]"<<endl;
-        i++;
+        if((itr->second).second==false)
+        {
+            cout<<i<<". "<<(itr->second).first<<" ["<<itr->first<<"]"<<endl;
+            i++;
+        }
     }
+    if(i==1) cout<<"There are no pending tasks!"<<endl;
 }
 
 void delTask(int argc, char* argv[])
 {
     if(argc<3)
-        cout<<"Error: Missing tasks string. Nothing added!";
+        cout<<"Error: Missing NUMBER for deleting tasks.";
     else
     {
-        int i=1;
+        int i=1, notfound=1;
         for(auto itr=tasks.begin(); itr!=tasks.end(); itr++)
         {
-            if(to_string(i)==argv[2])
+            if((itr->second).second==false)
             {
-                tasks.erase(itr);
-                break;
+                if(itr->first==argv[2])
+                {
+                    tasks.erase(itr);
+                    notfound=0;
+                    break;
+                }
+                i++;
             }
-            i++;
         }
-        updateTask();
+        if(notfound) cout<<"Error: task with index #"<<i<<" does not exist. Nothing deleted."<<endl;
+        else {
+            updateTask();
+            cout<<"Deleted task #"<<i<<endl;
+        }
     }
 }
 
 void doneTask(int argc, char* argv[])
 {
     if(argc<3)
-        cout<<"Error: Missing tasks string. Nothing added!";
+        cout<<"Error: Missing NUMBER for marking tasks as done.";
     else
     {
-        int i=1;
+        int i=1, notfound=1;
         for(auto itr=tasks.begin(); itr!=tasks.end(); itr++)
         {
-            if(to_string(i)==argv[2])
+            if((itr->second).second==false)
             {
-                (itr->second).second="true";
-                break;
+                if(itr->first==argv[2])
+                {
+                    (itr->second).second=true;
+                    notfound=0;
+                    break;
+                }
+                i++;
             }
-            i++;
         }
-        updateTask();
+        if(notfound) cout<<"Error: no incomplete item with index #"<<i<<" exists."<<endl;
+        else {
+            updateTask();
+            cout<<"Marked item as done."<<endl;
+        }
     }
 }
 
 void report()
 {
-    cout<<"Pending :"<<endl;
-    int i=0;
+    int p=0, c=0;
     for(auto itr=tasks.begin(); itr!=tasks.end(); itr++)
     {
-        if((itr->second).second==true)
-        {
-            cout<<i<<". "<<itr->first<<" ["<<(itr->second).first<<"]"<<endl;
-            i++;
-        }
+        if((itr->second).second==false) p++;
+        else c++;
     }
-    cout<<"Completed :"<<endl;
-    i=0;
+
+    cout<<"Pending : "<<p<<endl;
+    int i=1;
     for(auto itr=tasks.begin(); itr!=tasks.end(); itr++)
     {
         if((itr->second).second==false)
         {
-            cout<<i<<". "<<itr->first<<" ["<<(itr->second).first<<"]"<<endl;
+            cout<<i<<". "<<(itr->second).first<<" ["<<itr->first<<"]"<<endl;
+            i++;
+        }
+    }
+    cout<<"\nCompleted : "<<c<<endl;
+    i=1;
+    for(auto itr=tasks.begin(); itr!=tasks.end(); itr++)
+    {
+        if((itr->second).second==true)
+        {
+            cout<<i<<". "<<(itr->second).first<<endl;
             i++;
         }
     }
@@ -142,67 +205,52 @@ void report()
 
 int main(int argc, char* argv[])
 {
-    cout<<argc<<endl;
-    for(int i=0; i<argc; i++)
-        cout<<argv[i]<<"; ";
-
-    string todo, priority, task;
-    bool isDone;
-    vector<vector<string>> todov;
-	ifstream task_file("task.txt");
-	// ofstream ofs;
- 
-    if(task_file) {
-        ostringstream ss;
-        ss << task_file.rdbuf(); // reading data
-        todo = ss.str();
-        cout<<"\n"<<todo<<"\n"<<endl;
-        todov = split(todo);
-        for(int i=0; i<todov.size(); i++)
+    string cmd="";
+    // cout<<argc<<endl;
+    for(int j=0; j<argc; j++)
+    {
+        // cout<<j<<" "<<argv[j]<<"---\n";
+        // if(argv[j]=="help")
+        //     cout<<true<<endl;
+        if(j==1)
         {
-            priority=todov[i][0];
-            task=todov[i][1];
-            isDone=((todov[i][2]=="true") ? true : false);
-            // cout<<"["<<priority<<"] "<<task<<" "<<isDone<<endl;
-            tasks.insert({priority, pair<string,bool>{task, isDone}});
-            cout<<endl;
-        }
+            for(int k=0; argv[j][k]!='\0'; k++)
+                cmd+=argv[j][k];
+        }        
+        // if(cmd=="help")
+        //     cout<<"yes"<<endl;
     }
 
-    // for(auto itr=tasks.begin(); itr!=tasks.end(); itr++)
-    //     cout<<"["<<itr->first<<"] "<<(itr->second).first<<" "<<(itr->second).second<<endl;
+    initializeTasks();
 
-
-
-    if(argv[1]=="help")
+    if(cmd=="help")
     {
         printHelp();
     }
-    else if(argv[1]=="add")
+    else if(cmd=="add")
     {
         addTask(argc, argv);
     }
-    else if(argv[1]=="ls")
+    else if(cmd=="ls")
     {
         lsTask();
     }
-    else if(argv[1]=="del")
+    else if(cmd=="del")
     {
         delTask(argc, argv);
     }
-    else if(argv[1]=="done")
+    else if(cmd=="done")
     {
         doneTask(argc, argv);
     }
-    else if(argv[1]=="report")
+    else if(cmd=="report")
     {
         report();
     }
     else
     {
-        cout<<"INVALID";
+        printHelp();
     }
 
     return 0;
 }
-
