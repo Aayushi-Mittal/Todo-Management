@@ -3,7 +3,8 @@
 #include<sstream>
 using namespace std;
 
-multimap<string, pair<string, bool>> tasks;
+// Container of all the tasks with priority and status.
+multimap<int, pair<string, bool>> tasks;
 
 vector<vector<string>> split(string str)
 {
@@ -34,7 +35,8 @@ vector<vector<string>> split(string str)
 
 void initializeTasks()
 {
-    string todo, priority, task;
+    string todo, task;
+    int priority;
     bool isDone;
     vector<vector<string>> todov;
 	ifstream task_file;
@@ -46,7 +48,7 @@ void initializeTasks()
         todov = split(todo);
         for(int i=0; i<todov.size(); i++)
         {
-            priority=todov[i][0];
+            priority=stoi(todov[i][0]);
             task=todov[i][1];
             isDone=((todov[i][2]=="1") ? true : false);
             // cout<<"["<<priority<<"] "<<task<<" "<<isDone<<endl;
@@ -59,13 +61,7 @@ void initializeTasks()
 
 void printHelp()
 {
-    cout<<"Usage :-"<<endl;
-    cout<<"$ ./task add 2 hello world    # Add a new item with priority 2 and text \"hello world\" to the list"<<endl;
-    cout<<"$ ./task ls                   # Show incomplete priority list items sorted by priority in ascending order"<<endl;
-    cout<<"$ ./task del INDEX            # Delete the incomplete item with the given index"<<endl;
-    cout<<"$ ./task done INDEX           # Mark the incomplete item with the given index as complete"<<endl;
-    cout<<"$ ./task help                 # Show usage"<<endl;
-    cout<<"$ ./task report               # Statistics"<<endl;
+    cout<<"Usage :-\n$ ./task add 2 hello world    # Add a new item with priority 2 and text \"hello world\" to the list\n$ ./task ls                   # Show incomplete priority list items sorted by priority in ascending order\n$ ./task del INDEX            # Delete the incomplete item with the given index\n$ ./task done INDEX           # Mark the incomplete item with the given index as complete\n$ ./task help                 # Show usage\n$ ./task report               # Statistics"<<endl;
 }
 
 void updateTask()
@@ -95,7 +91,7 @@ void addTask(int argc, char* argv[])
         string todo="";
         for(int i=3; i<argc; i++)
             todo+=argv[i];
-        tasks.insert({argv[2], pair<string,bool>{todo, false}});
+        tasks.insert({stoi(argv[2]), pair<string,bool>{todo, false}});
         updateTask();
         cout<<"Added task: \""<<todo<<"\" with priority "<<argv[2]<<endl;
     }
@@ -126,7 +122,7 @@ void delTask(int argc, char* argv[])
         {
             if((itr->second).second==false)
             {
-                if(itr->first==argv[2])
+                if(to_string(i)==argv[2])
                 {
                     tasks.erase(itr);
                     notfound=0;
@@ -135,7 +131,7 @@ void delTask(int argc, char* argv[])
                 i++;
             }
         }
-        if(notfound) cout<<"Error: task with index #"<<i<<" does not exist. Nothing deleted."<<endl;
+        if(notfound || i<1) cout<<"Error: task with index #"<<argv[2]<<" does not exist. Nothing deleted."<<endl;
         else {
             updateTask();
             cout<<"Deleted task #"<<i<<endl;
@@ -154,7 +150,7 @@ void doneTask(int argc, char* argv[])
         {
             if((itr->second).second==false)
             {
-                if(itr->first==argv[2])
+                if(to_string(i)==argv[2])
                 {
                     (itr->second).second=true;
                     notfound=0;
@@ -163,7 +159,7 @@ void doneTask(int argc, char* argv[])
                 i++;
             }
         }
-        if(notfound) cout<<"Error: no incomplete item with index #"<<i<<" exists."<<endl;
+        if(notfound || i<1) cout<<"Error: no incomplete item with index #"<<argv[2]<<" exists."<<endl;
         else {
             updateTask();
             cout<<"Marked item as done."<<endl;
@@ -205,52 +201,27 @@ void report()
 
 int main(int argc, char* argv[])
 {
+    //since strings and character array are not same.
     string cmd="";
-    // cout<<argc<<endl;
-    for(int j=0; j<argc; j++)
-    {
-        // cout<<j<<" "<<argv[j]<<"---\n";
-        // if(argv[j]=="help")
-        //     cout<<true<<endl;
-        if(j==1)
-        {
-            for(int k=0; argv[j][k]!='\0'; k++)
-                cmd+=argv[j][k];
-        }        
-        // if(cmd=="help")
-        //     cout<<"yes"<<endl;
-    }
+    for(int k=0; argv[1][k]!='\0'; k++)
+        cmd+=argv[1][k];
 
     initializeTasks();
 
     if(cmd=="help")
-    {
         printHelp();
-    }
     else if(cmd=="add")
-    {
         addTask(argc, argv);
-    }
     else if(cmd=="ls")
-    {
         lsTask();
-    }
     else if(cmd=="del")
-    {
         delTask(argc, argv);
-    }
     else if(cmd=="done")
-    {
         doneTask(argc, argv);
-    }
     else if(cmd=="report")
-    {
         report();
-    }
     else
-    {
         printHelp();
-    }
 
     return 0;
 }
