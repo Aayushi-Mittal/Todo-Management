@@ -61,7 +61,15 @@ void initializeTasks()
 
 void printHelp()
 {
-    cout<<"Usage :-\n$ ./task add 2 hello world    # Add a new item with priority 2 and text \"hello world\" to the list\n$ ./task ls                   # Show incomplete priority list items sorted by priority in ascending order\n$ ./task del INDEX            # Delete the incomplete item with the given index\n$ ./task done INDEX           # Mark the incomplete item with the given index as complete\n$ ./task help                 # Show usage\n$ ./task report               # Statistics"<<endl;
+    string help="Usage :-\n$ ./task add 2 hello world    # Add a new item with priority 2 and text \"hello world\" to the list\n$ ./task ls                   # Show incomplete priority list items sorted by priority in ascending order\n$ ./task del INDEX            # Delete the incomplete item with the given index\n$ ./task done INDEX           # Mark the incomplete item with the given index as complete\n$ ./task help                 # Show usage\n$ ./task report               # Statistics";
+    cout<<help<<endl;
+    // cout<<"Usage :-";
+    // cout<<"\n$ ./task add 2 hello world    # Add a new item with priority 2 and text \"hello world\" to the list";
+    // cout<<"\n$ ./task ls                   # Show incomplete priority list items sorted by priority in ascending order";
+    // cout<<"\n$ ./task del INDEX            # Delete the incomplete item with the given index";
+    // cout<<"\n$ ./task done INDEX           # Mark the incomplete item with the given index as complete";
+    // cout<<"\n$ ./task help                 # Show usage";
+    // cout<<"\n$ ./task report               # Statistics";
 }
 
 void updateTask()
@@ -203,12 +211,17 @@ int main(int argc, char* argv[])
 {
     //since strings and character array are not same.
     string cmd="";
-    for(int k=0; argv[1][k]!='\0'; k++)
-        cmd+=argv[1][k];
+    if(argc>1)
+    {
+        for(int k=0; argv[1][k]!='\0'; k++)
+            cmd+=argv[1][k];
+    }
+    else
+        cmd="help";
 
     initializeTasks();
 
-    if(cmd=="help")
+    if(cmd=="help" || argc==1)
         printHelp();
     else if(cmd=="add")
         addTask(argc, argv);
