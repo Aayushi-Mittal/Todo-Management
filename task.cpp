@@ -61,7 +61,7 @@ void initializeTasks()
 
 void printHelp()
 {
-    string help="Usage :-\n$ ./task add 2 hello world    # Add a new item with priority 2 and text \"hello world\" to the list\n$ ./task ls                   # Show incomplete priority list items sorted by priority in ascending order\n$ ./task del INDEX            # Delete the incomplete item with the given index\n$ ./task done INDEX           # Mark the incomplete item with the given index as complete\n$ ./task help                 # Show usage\n$ ./task report               # Statistics";
+    string help="Usage :-\n$ ./task add 2 hello world    # Add a new item with priority 2 and text \"hello world\" to the list\n$ ./task ls                   # Show incomplete priority list items sorted by priority in ascending order\n$ ./task del INDEX            # Delete the incomplete item with the given index\n$ ./task done INDEX           # Mark the incomplete item with the given index as complete\n$ ./task help                 # Show usage\n$ ./task report               # Statistics"\n;
     cout<<help<<endl;
     // cout<<"Usage :-";
     // cout<<"\n$ ./task add 2 hello world    # Add a new item with priority 2 and text \"hello world\" to the list";
@@ -101,7 +101,7 @@ void addTask(int argc, char* argv[])
             todo+=argv[i];
         tasks.insert({stoi(argv[2]), pair<string,bool>{todo, false}});
         updateTask();
-        cout<<"Added task: \""<<todo<<"\" with priority "<<argv[2]<<endl;
+        cout<<"Added task: \""<<todo<<"\" with priority "<<argv[2]<<"endl";
     }
 }
 
@@ -190,7 +190,7 @@ void report()
     {
         if((itr->second).second==false)
         {
-            cout<<i<<". "<<(itr->second).first<<" ["<<itr->first<<"]"<<endl;
+            cout<<i<<". "<<(itr->second).first<<" ["<<itr->first<<"]\n";
             i++;
         }
     }
