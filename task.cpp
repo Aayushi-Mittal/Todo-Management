@@ -3,9 +3,10 @@
 #include<sstream>
 using namespace std;
 
-// Container of all the tasks with priority and status.
+// Container of all the tasks with priority and status(isDone?).
 multimap<int, pair<string, bool>> tasks;
 
+// Function for splitting the contents of file into tasks multimap
 vector<vector<string>> split(string str)
 {
     vector<vector<string>> res;
@@ -51,25 +52,18 @@ void initializeTasks()
             priority=stoi(todov[i][0]);
             task=todov[i][1];
             isDone=((todov[i][2]=="1") ? true : false);
-            // cout<<"["<<priority<<"] "<<task<<" "<<isDone<<endl;
             tasks.insert({priority, pair<string,bool>{task, isDone}});
-            // cout<<endl;
         }
     }
     task_file.close();
 }
 
+// -------------------------------- Functions for each case starts from here --------------------------------
+
 void printHelp()
 {
     string help="Usage :-\n$ ./task add 2 hello world    # Add a new item with priority 2 and text \"hello world\" to the list\n$ ./task ls                   # Show incomplete priority list items sorted by priority in ascending order\n$ ./task del INDEX            # Delete the incomplete item with the given index\n$ ./task done INDEX           # Mark the incomplete item with the given index as complete\n$ ./task help                 # Show usage\n$ ./task report               # Statistics";
     cout<<help<<endl;
-    // cout<<"Usage :-";
-    // cout<<"\n$ ./task add 2 hello world    # Add a new item with priority 2 and text \"hello world\" to the list";
-    // cout<<"\n$ ./task ls                   # Show incomplete priority list items sorted by priority in ascending order";
-    // cout<<"\n$ ./task del INDEX            # Delete the incomplete item with the given index";
-    // cout<<"\n$ ./task done INDEX           # Mark the incomplete item with the given index as complete";
-    // cout<<"\n$ ./task help                 # Show usage";
-    // cout<<"\n$ ./task report               # Statistics";
 }
 
 void updateTask()
@@ -206,6 +200,7 @@ void report()
     }
 }
 
+// -------------------------------- Main Code starts from here --------------------------------
 
 int main(int argc, char* argv[])
 {
